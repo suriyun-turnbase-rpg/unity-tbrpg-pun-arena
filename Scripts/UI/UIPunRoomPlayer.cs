@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using PunPlayer = Photon.Realtime.Player;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 namespace PunArena.UI
 {
@@ -87,6 +88,22 @@ namespace PunArena.UI
                     }
                 }
             }
+        }
+
+        private void Start()
+        {
+            PunArenaManager.Instance.onPlayerPropertiesUpdate.AddListener(OnPlayerPropertiesUpdate);
+        }
+
+        private void OnDestroy()
+        {
+            PunArenaManager.Instance.onPlayerPropertiesUpdate.RemoveListener(OnPlayerPropertiesUpdate);
+        }
+
+        public void OnPlayerPropertiesUpdate(PunPlayer targetPlayer, Hashtable changedProps)
+        {
+            if (targetPlayer.ActorNumber == Player.ActorNumber)
+                Player = targetPlayer;
         }
     }
 }
