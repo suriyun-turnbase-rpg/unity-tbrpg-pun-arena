@@ -13,6 +13,7 @@ namespace PunArena.UI
             uiRoomList.Show();
             PunArenaManager.Instance.onJoinRoom.AddListener(OnJoin);
             PunArenaManager.Instance.onLeaveRoom.AddListener(OnLeave);
+            PunArenaManager.Instance.ConnectToBestCloudServer();
         }
 
         private void OnDestroy()
