@@ -1,10 +1,9 @@
 ﻿using RealtimeArena.Room;
-using System.Collections.Generic;
 using UnityEngine.UI;
 
 namespace PunArena.UI
 {
-    public class UIRoomPassword : UIBase
+    public class UIPunRoomPassword : UIBase
     {
         public Text textTitle;
         public InputField inputPassword;

@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace PunArena.UI
 {
-    public class UIRoomCreate : UIBase
+    public class UIPunRoomCreate : UIBase
     {
         public InputField inputTitle;
         public InputField inputPassword;

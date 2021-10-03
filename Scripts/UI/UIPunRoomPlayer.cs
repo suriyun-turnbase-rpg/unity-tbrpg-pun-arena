@@ -5,7 +5,7 @@ using PunPlayer = Photon.Realtime.Player;
 
 namespace PunArena.UI
 {
-    public class UIRoomPlayer : UIBase
+    public class UIPunRoomPlayer : UIBase
     {
         public Text textPlayerName;
         public Text textPlayerLevel;

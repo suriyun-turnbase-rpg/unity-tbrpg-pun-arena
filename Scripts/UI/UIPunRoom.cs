@@ -7,14 +7,14 @@ using Photon.Pun;
 
 namespace PunArena.UI
 {
-    public class UIRoom : UIBase
+    public class UIPunRoom : UIBase
     {
-        public UIRoomPlayer playerPrefab;
+        public UIPunRoomPlayer playerPrefab;
         public Transform playerContainer;
         public Text textCountDown;
 
         private Coroutine countDownCoroutine = null;
-        private readonly Dictionary<int, UIRoomPlayer> uiRoomPlayers = new Dictionary<int, UIRoomPlayer>();
+        private readonly Dictionary<int, UIPunRoomPlayer> uiRoomPlayers = new Dictionary<int, UIPunRoomPlayer>();
 
         private void OnEnable()
         {
@@ -87,7 +87,7 @@ namespace PunArena.UI
             uiRoomPlayers.Clear();
             foreach (var player in PhotonNetwork.CurrentRoom.Players.Values)
             {
-                UIRoomPlayer newRoomUI = Instantiate(playerPrefab, playerContainer);
+                UIPunRoomPlayer newRoomUI = Instantiate(playerPrefab, playerContainer);
                 newRoomUI.Player = player;
                 newRoomUI.Show();
                 uiRoomPlayers[player.ActorNumber] = newRoomUI;

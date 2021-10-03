@@ -2,10 +2,10 @@
 
 namespace PunArena.UI
 {
-    public class UILobbyManager : MonoBehaviour
+    public class UIPunLobbyManager : MonoBehaviour
     {
-        public UIRoomList uiRoomList;
-        public UIRoom uiRoom;
+        public UIPunRoomList uiRoomList;
+        public UIPunRoom uiRoom;
 
         private void Start()
         {

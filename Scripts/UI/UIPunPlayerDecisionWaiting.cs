@@ -5,7 +5,7 @@ using UnityEngine.UI;
 namespace PunArena.UI
 {
     [RequireComponent(typeof(UICharacterStatsGeneric))]
-    public class UIPlayerDecisionWaiting : MonoBehaviour
+    public class UIPunPlayerDecisionWaiting : MonoBehaviour
     {
         public GameObject rootContainer;
         public Text textCountDown;

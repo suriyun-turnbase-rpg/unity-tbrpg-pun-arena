@@ -2,9 +2,9 @@
 
 namespace PunArena.UI
 {
-    public class UIRoomListEntry : UIBase
+    public class UIPunRoomListEntry : UIBase
     {
-        public UIRoomList uiRoomList;
+        public UIPunRoomList uiRoomList;
         public Text textTitle;
 
         public PunArenaRoom RoomData { get; set; }

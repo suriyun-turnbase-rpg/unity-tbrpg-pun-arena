@@ -4,11 +4,11 @@ using UnityEngine;
 
 namespace PunArena.UI
 {
-    public class UIRoomList : UIBase
+    public class UIPunRoomList : UIBase
     {
-        public UIRoomListEntry entryPrefab;
+        public UIPunRoomListEntry entryPrefab;
         public Transform entryContainer;
-        public UIRoomPassword uiRoomPassword;
+        public UIPunRoomPassword uiRoomPassword;
 
         private void OnEnable()
         {
@@ -22,7 +22,7 @@ namespace PunArena.UI
             entryContainer.RemoveAllChildren();
             for (int i = 0; i < rooms.Length; ++i)
             {
-                UIRoomListEntry newRoomUI = Instantiate(entryPrefab, entryContainer);
+                UIPunRoomListEntry newRoomUI = Instantiate(entryPrefab, entryContainer);
                 newRoomUI.uiRoomList = this;
                 newRoomUI.RoomData = rooms[i];
                 newRoomUI.RoomTitle = rooms[i].roomName;
