@@ -40,6 +40,7 @@ namespace PunArena
         public StringEvent onPlayerLeave = new StringEvent();
         public RoomStateChangeEvent onRoomStateChange = new RoomStateChangeEvent();
         public UnityEvent onRoomListUpdate = new UnityEvent();
+        public PlayerPropertiesUpdateEvent onPlayerPropertiesUpdate = new PlayerPropertiesUpdateEvent();
         public readonly Dictionary<string, PunArenaRoom> Rooms = new Dictionary<string, PunArenaRoom>();
         private PhotonView view;
         private bool isConnectingToBestRegion;
@@ -216,6 +217,7 @@ namespace PunArena
                     }
                 }
             }
+            onPlayerPropertiesUpdate.Invoke(targetPlayer, changedProps);
         }
 
         #region Cloud server connection
