@@ -30,6 +30,9 @@ namespace PunArena
         public string masterAddress = "localhost";
         public int masterPort = 5055;
         public string region;
+        public UnityEvent onConnecting = new UnityEvent();
+        public UnityEvent onConnect = new UnityEvent();
+        public UnityEvent onJoiningRoom = new UnityEvent();
         public UnityEvent onJoinRoom = new UnityEvent();
         public StringEvent onJoinRoomFailed = new StringEvent();
         public RoomErrorEvent onRoomError = new RoomErrorEvent();
@@ -97,6 +100,7 @@ namespace PunArena
         public void JoinRoom(string roomName)
         {
             PhotonNetwork.JoinRoom(roomName);
+            onJoiningRoom.Invoke();
         }
 
         public override void OnJoinedRoom()
@@ -224,6 +228,7 @@ namespace PunArena
             PhotonNetwork.OfflineMode = false;
             PhotonNetwork.ConnectToBestCloudServer();
             isConnectingToBestRegion = true;
+            onConnecting.Invoke();
         }
 
         public void ConnectToRegion()
@@ -244,6 +249,7 @@ namespace PunArena
                 PhotonNetwork.OfflineMode = false;
                 PhotonNetwork.ConnectToRegion(region);
             }
+            onConnecting.Invoke();
         }
 
         public override void OnConnectedToMaster()
@@ -266,6 +272,7 @@ namespace PunArena
                 PhotonNetwork.JoinLobby();
             }
             PhotonNetwork.LocalPlayer.NickName = Player.CurrentPlayer.ProfileName;
+            onConnect.Invoke();
         }
         #endregion
 
