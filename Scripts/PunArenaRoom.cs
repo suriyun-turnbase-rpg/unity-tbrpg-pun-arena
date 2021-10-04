@@ -11,7 +11,7 @@ namespace PunArena
         public string playerId;
         public string playerName;
         public ERoomState state;
-        public int playersCount;
+        public int playerCount;
         public int maxPlayers;
     }
 }

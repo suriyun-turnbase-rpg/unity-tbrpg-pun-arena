@@ -161,7 +161,7 @@ namespace PunArena
                     playerId = (string)room.CustomProperties[CUSTOM_ROOM_PLAYER_ID],
                     playerName = (string)room.CustomProperties[CUSTOM_ROOM_PLAYER_NAME],
                     state = (ERoomState)room.CustomProperties[CUSTOM_ROOM_STATE],
-                    playersCount = room.PlayerCount,
+                    playerCount = room.PlayerCount,
                     maxPlayers = room.MaxPlayers,
                 };
                 if (Rooms.ContainsKey(room.Name))
