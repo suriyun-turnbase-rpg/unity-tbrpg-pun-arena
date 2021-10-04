@@ -279,9 +279,17 @@ namespace PunArena
             }
         }
 
+        public override void OnJoinedLobby()
+        {
+            base.OnJoinedLobby();
+            onConnect.Invoke();
+        }
+
         #region Cloud server connection
         public void ConnectToBestCloudServer()
         {
+            if (PhotonNetwork.InLobby || PhotonNetwork.InRoom)
+                return;
             // Delete saved best region, to re-ping all regions, to fix unknow ping problem
             ServerSettings.ResetBestRegionCodeInPreferences();
             PhotonNetwork.NetworkingClient.SerializationProtocol = ExitGames.Client.Photon.SerializationProtocol.GpBinaryV18;
@@ -295,6 +303,8 @@ namespace PunArena
 
         public void ConnectToRegion()
         {
+            if (PhotonNetwork.InLobby || PhotonNetwork.InRoom)
+                return;
             // Hacking PUN, It seems like PUN won't connect to name server when call `PhotonNetwork.ConnectToRegion()`
             // Have to connect to best cloud server to make it connect to name server to get all regions list
             if (!isConnectedToBestRegion)
@@ -313,6 +323,17 @@ namespace PunArena
                 PhotonNetwork.ConnectToRegion(region);
             }
             onConnecting.Invoke();
+        }
+
+        public virtual void ConnectToSavedCloudServer()
+        {
+            if (PhotonNetwork.InLobby || PhotonNetwork.InRoom)
+                return;
+            region = PlayerPrefs.GetString(saveSelectedRegionKey, string.Empty);
+            if (string.IsNullOrEmpty(region))
+                ConnectToBestCloudServer();
+            else
+                ConnectToRegion();
         }
 
         public override void OnConnectedToMaster()
@@ -335,7 +356,6 @@ namespace PunArena
                 PhotonNetwork.JoinLobby();
             }
             PhotonNetwork.LocalPlayer.NickName = Player.CurrentPlayer.ProfileName;
-            onConnect.Invoke();
         }
         #endregion
 
