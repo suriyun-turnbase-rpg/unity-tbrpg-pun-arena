@@ -8,6 +8,8 @@ using UnityEngine;
 using PunPlayer = Photon.Realtime.Player;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using UnityEngine.Events;
+using PunArena.Message;
+using System.Linq;
 
 namespace PunArena
 {
@@ -20,7 +22,11 @@ namespace PunArena
         public const string CUSTOM_ROOM_STATE = "RS";
         public const string CUSTOM_PLAYER_STATE = "PS";
         public const string CUSTOM_PLAYER_EXP = "XP";
+        public const string CUSTOM_PLAYER_TEAM = "PT";
         public const string CUSTOM_PLAYER_BP = "XP";
+        public delegate void OnUpdateActiveCharacter(string entityId);
+        public delegate void OnDoSelectedAction(string entityId, string targetEntityId, int action, int seed);
+        public delegate void OnUpdateGameplayState(UpdateGameplayStateMsg msg);
         public static PunArenaManager Instance { get; private set; }
         public string battleScene = "PunBattleScene";
         public string roomName = string.Empty;
@@ -41,6 +47,9 @@ namespace PunArena
         public RoomStateChangeEvent onRoomStateChange = new RoomStateChangeEvent();
         public UnityEvent onRoomListUpdate = new UnityEvent();
         public PlayerPropertiesUpdateEvent onPlayerPropertiesUpdate = new PlayerPropertiesUpdateEvent();
+        public event OnUpdateActiveCharacter onUpdateActiveCharacter = null;
+        public event OnDoSelectedAction onDoSelectedAction = null;
+        public event OnUpdateGameplayState onUpdateGameplayState = null;
         public readonly Dictionary<string, PunArenaRoom> Rooms = new Dictionary<string, PunArenaRoom>();
         private PhotonView view;
         private bool isConnectingToBestRegion;
@@ -129,6 +138,18 @@ namespace PunArena
         public override void OnPlayerEnteredRoom(PunPlayer newPlayer)
         {
             onPlayerJoin.Invoke(newPlayer);
+            // Set player team
+            var players = PhotonNetwork.CurrentRoom.Players.Values.ToList();
+            players.Sort((a, b) =>
+            {
+                return a.UserId.CompareTo(b.UserId);
+            });
+            byte team = 0;
+            for (int i = 0; i < players.Count; ++i)
+            {
+                var player = players[i];
+                player.SetTeam(team++);
+            }
         }
 
         public override void OnPlayerLeftRoom(PunPlayer otherPlayer)
@@ -267,6 +288,7 @@ namespace PunArena
             PhotonNetwork.NetworkingClient.SerializationProtocol = ExitGames.Client.Photon.SerializationProtocol.GpBinaryV18;
             PhotonNetwork.AutomaticallySyncScene = false;
             PhotonNetwork.OfflineMode = false;
+            PhotonNetwork.AuthValues = new AuthenticationValues(Player.CurrentPlayer.Id);
             PhotonNetwork.ConnectToBestCloudServer();
             isConnectingToBestRegion = true;
             onConnecting.Invoke();
@@ -288,6 +310,7 @@ namespace PunArena
                 PhotonNetwork.NetworkingClient.SerializationProtocol = ExitGames.Client.Photon.SerializationProtocol.GpBinaryV18;
                 PhotonNetwork.AutomaticallySyncScene = false;
                 PhotonNetwork.OfflineMode = false;
+                PhotonNetwork.AuthValues = new AuthenticationValues(Player.CurrentPlayer.Id);
                 PhotonNetwork.ConnectToRegion(region);
             }
             onConnecting.Invoke();
@@ -349,7 +372,8 @@ namespace PunArena
         [PunRPC]
         private void BroadSendUpdateActiveCharacter(string id)
         {
-
+            if (onUpdateActiveCharacter != null)
+                onUpdateActiveCharacter.Invoke(id);
         }
 
         public void SendDoSelectedAction(string entityId, string targetEntityId, int action, int seed)
@@ -370,15 +394,26 @@ namespace PunArena
         [PunRPC]
         private void BroadSendDoSelectedAction(string entityId, string targetEntityId, int action, int seed)
         {
-
+            if (onDoSelectedAction != null)
+                onDoSelectedAction.Invoke(entityId, targetEntityId, action, seed);
         }
 
-        /*
         public void SendUpdateGameplayState(UpdateGameplayStateMsg msg)
         {
-            await CurrentRoom.Send("updateGameplayState", msg);
+            /*
+            if (!PhotonNetwork.IsMasterClient) return;
+            if (PunArenaExtensions.GetRoomState() != ERoomState.Battle) return;
+            // TODO: Store gameplay state in-case player disconnect and reconnect they won't lose data.
+            photonView.RPC(nameof(BroadSendUpdateGameplayState), RpcTarget.All, msg);
+            */
         }
-        */
+
+        [PunRPC]
+        private void BroadSendUpdateGameplayState(UpdateGameplayStateMsg msg)
+        {
+            if (onUpdateGameplayState != null)
+                onUpdateGameplayState.Invoke(msg);
+        }
         #endregion
     }
 }

@@ -1,4 +1,4 @@
-﻿using RealtimeArena.Battle;
+﻿using PunArena.Battle;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,14 +11,14 @@ namespace PunArena.UI
         public Text textCountDown;
         public Image imageCountDownGage;
         private UICharacterStatsGeneric uiCharacterStats;
-        private RealtimeArenaGameplayManager manager;
+        private PunArenaGameplayManager manager;
         private bool dirtyIsActiveCharacter;
         private float countDown;
 
         private void Start()
         {
             uiCharacterStats = GetComponent<UICharacterStatsGeneric>();
-            manager = FindObjectOfType<RealtimeArenaGameplayManager>();
+            manager = FindObjectOfType<PunArenaGameplayManager>();
             StartCountDown();
         }
 

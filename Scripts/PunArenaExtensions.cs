@@ -22,6 +22,11 @@ namespace PunArena
             return player.GetRoomPlayerProperty<int>(PunArenaManager.CUSTOM_PLAYER_EXP);
         }
 
+        public static byte GetTeam(this PunPlayer player)
+        {
+            return player.GetRoomPlayerProperty<byte>(PunArenaManager.CUSTOM_PLAYER_TEAM);
+        }
+
         public static void SetState(this PunPlayer player, EPlayerState state)
         {
             player.SetRoomPlayerProperty(PunArenaManager.CUSTOM_PLAYER_STATE, state);
@@ -35,6 +40,11 @@ namespace PunArena
         public static void SetBp(this PunPlayer player, int bp)
         {
             player.SetRoomPlayerProperty(PunArenaManager.CUSTOM_PLAYER_EXP, bp);
+        }
+
+        public static void SetTeam(this PunPlayer player, byte team)
+        {
+            player.SetRoomPlayerProperty(PunArenaManager.CUSTOM_PLAYER_TEAM, team);
         }
 
         public static ERoomState GetRoomState()
