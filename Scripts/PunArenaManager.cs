@@ -47,6 +47,7 @@ namespace PunArena
         private bool isConnectedToBestRegion;
         private bool isConnectingToSelectedRegion;
         private bool waitForPlayerAction;
+        private Coroutine countDownToStartGameCoroutine;
 
         private void Awake()
         {
@@ -121,6 +122,8 @@ namespace PunArena
         public override void OnLeftRoom()
         {
             onLeaveRoom.Invoke();
+            if (countDownToStartGameCoroutine != null)
+                StopCoroutine(countDownToStartGameCoroutine);
         }
 
         public override void OnPlayerEnteredRoom(PunPlayer newPlayer)
@@ -131,6 +134,8 @@ namespace PunArena
         public override void OnPlayerLeftRoom(PunPlayer otherPlayer)
         {
             onPlayerLeave.Invoke(otherPlayer);
+            if (countDownToStartGameCoroutine != null)
+                StopCoroutine(countDownToStartGameCoroutine);
         }
 
         public override void OnRoomListUpdate(List<RoomInfo> roomList)
@@ -175,15 +180,27 @@ namespace PunArena
         {
             if (propertiesThatChanged.ContainsKey(CUSTOM_ROOM_STATE))
             {
-                onRoomStateChange.Invoke((ERoomState)propertiesThatChanged[CUSTOM_ROOM_STATE]);
+                onRoomStateChange.Invoke(PunArenaExtensions.GetRoomState());
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    if (PunArenaExtensions.GetRoomState() == ERoomState.CountDownToStartGame)
+                    {
+                        countDownToStartGameCoroutine = StartCoroutine(CountDownToStartGame());
+                    }
+                    else
+                    {
+                        if (countDownToStartGameCoroutine != null)
+                            StopCoroutine(countDownToStartGameCoroutine);
+                    }
+                }
             }
         }
 
         public override void OnPlayerPropertiesUpdate(PunPlayer targetPlayer, Hashtable changedProps)
         {
-            if (PhotonNetwork.IsMasterClient)
+            if (changedProps.ContainsKey(CUSTOM_PLAYER_STATE))
             {
-                if (changedProps.ContainsKey(CUSTOM_PLAYER_STATE))
+                if (PhotonNetwork.IsMasterClient)
                 {
                     if (PhotonNetwork.CurrentRoom.PlayerCount >= 2)
                     {
@@ -231,6 +248,15 @@ namespace PunArena
                 }
             }
             onPlayerPropertiesUpdate.Invoke(targetPlayer, changedProps);
+        }
+
+        IEnumerator CountDownToStartGame()
+        {
+            yield return new WaitForSecondsRealtime(PunArenaConsts.ENTER_GAME_COUNT_DOWN);
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PunArenaExtensions.SetRoomState(ERoomState.WaitPlayersToEnterGame);
+            }
         }
 
         #region Cloud server connection
