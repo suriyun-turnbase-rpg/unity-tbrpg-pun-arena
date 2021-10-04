@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using Photon.Pun;
+using PunPlayer = Photon.Realtime.Player;
 
 namespace PunArena.UI
 {
@@ -20,27 +21,21 @@ namespace PunArena.UI
         {
             if (textCountDown)
                 textCountDown.text = string.Empty;
-            PunArenaManager.Instance.onRoomError.AddListener(OnError);
             PunArenaManager.Instance.onRoomStateChange.AddListener(OnStateChange);
-            PunArenaManager.Instance.onLeaveRoom.AddListener(OnLeave);
-            UpdateRoomState(PunArenaExtensions.GetRoomState());
+            PunArenaManager.Instance.onPlayerJoin.AddListener(OnJoin);
+            PunArenaManager.Instance.onPlayerLeave.AddListener(OnLeave);
+            UpdatePlayers();
         }
 
         private void OnDisable()
         {
-            PunArenaManager.Instance.onRoomError.RemoveListener(OnError);
             PunArenaManager.Instance.onRoomStateChange.RemoveListener(OnStateChange);
-            PunArenaManager.Instance.onLeaveRoom.RemoveListener(OnLeave);
-        }
-
-        private void OnError(int code, string message)
-        {
-
+            PunArenaManager.Instance.onPlayerJoin.RemoveListener(OnJoin);
+            PunArenaManager.Instance.onPlayerLeave.RemoveListener(OnLeave);
         }
 
         private void OnStateChange(ERoomState state)
         {
-            UpdateRoomState(state);
             if (textCountDown)
                 textCountDown.text = string.Empty;
             if (countDownCoroutine != null)
@@ -76,12 +71,17 @@ namespace PunArena.UI
                 textCountDown.text = string.Empty;
         }
 
-        private void OnLeave()
+        private void OnJoin(PunPlayer player)
         {
-
+            UpdatePlayers();
         }
 
-        private void UpdateRoomState(ERoomState state)
+        private void OnLeave(PunPlayer player)
+        {
+            UpdatePlayers();
+        }
+
+        private void UpdatePlayers()
         {
             playerContainer.RemoveAllChildren();
             uiRoomPlayers.Clear();

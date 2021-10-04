@@ -35,9 +35,9 @@ namespace PunArena
         public UnityEvent onJoiningRoom = new UnityEvent();
         public UnityEvent onJoinRoom = new UnityEvent();
         public StringEvent onJoinRoomFailed = new StringEvent();
-        public RoomErrorEvent onRoomError = new RoomErrorEvent();
         public UnityEvent onLeaveRoom = new UnityEvent();
-        public StringEvent onPlayerLeave = new StringEvent();
+        public PunPlayerEvent onPlayerJoin = new PunPlayerEvent();
+        public PunPlayerEvent onPlayerLeave = new PunPlayerEvent();
         public RoomStateChangeEvent onRoomStateChange = new RoomStateChangeEvent();
         public UnityEvent onRoomListUpdate = new UnityEvent();
         public PlayerPropertiesUpdateEvent onPlayerPropertiesUpdate = new PlayerPropertiesUpdateEvent();
@@ -123,6 +123,16 @@ namespace PunArena
             onLeaveRoom.Invoke();
         }
 
+        public override void OnPlayerEnteredRoom(PunPlayer newPlayer)
+        {
+            onPlayerJoin.Invoke(newPlayer);
+        }
+
+        public override void OnPlayerLeftRoom(PunPlayer otherPlayer)
+        {
+            onPlayerLeave.Invoke(otherPlayer);
+        }
+
         public override void OnRoomListUpdate(List<RoomInfo> roomList)
         {
             foreach (RoomInfo room in roomList)
@@ -163,7 +173,10 @@ namespace PunArena
 
         public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
         {
-
+            if (propertiesThatChanged.ContainsKey(CUSTOM_ROOM_STATE))
+            {
+                onRoomStateChange.Invoke((ERoomState)propertiesThatChanged[CUSTOM_ROOM_STATE]);
+            }
         }
 
         public override void OnPlayerPropertiesUpdate(PunPlayer targetPlayer, Hashtable changedProps)
