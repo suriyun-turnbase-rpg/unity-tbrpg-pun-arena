@@ -3789,6 +3789,9 @@ MonoBehaviour:
   onRoomListUpdate:
     m_PersistentCalls:
       m_Calls: []
+  onPlayerPropertiesUpdate:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &1211990444
 Transform:
   m_ObjectHideFlags: 0
@@ -4452,7 +4455,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 875295103}
         m_MethodName: OnClickJoin
         m_Mode: 1
         m_Arguments:
