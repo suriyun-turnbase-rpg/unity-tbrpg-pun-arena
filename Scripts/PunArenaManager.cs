@@ -8,7 +8,6 @@ using UnityEngine;
 using PunPlayer = Photon.Realtime.Player;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using UnityEngine.Events;
-using PunArena.Message;
 using System.Linq;
 
 namespace PunArena
@@ -26,7 +25,7 @@ namespace PunArena
         public const string CUSTOM_PLAYER_BP = "XP";
         public delegate void OnUpdateActiveCharacter(string entityId);
         public delegate void OnDoSelectedAction(string entityId, string targetEntityId, int action, int seed);
-        public delegate void OnUpdateGameplayState(UpdateGameplayStateMsg msg);
+        public delegate void OnUpdateGameplayState(int winnerActorNumber, int loserActorNumber);
         public static PunArenaManager Instance { get; private set; }
         public string battleScene = "PunBattleScene";
         public string roomName = string.Empty;
@@ -366,11 +365,13 @@ namespace PunArena
             if (!PhotonNetwork.IsMasterClient) return;
             if (PunArenaExtensions.GetRoomState() != ERoomState.Battle) return;
             waitForPlayerAction = true;
-            photonView.RPC(nameof(BroadSendUpdateActiveCharacter), RpcTarget.All, id);
+            photonView.RPC(nameof(SendUpdateActiveCharacterFromMaster), RpcTarget.Others, id);
+            if (onUpdateActiveCharacter != null)
+                onUpdateActiveCharacter.Invoke(id);
         }
 
         [PunRPC]
-        private void BroadSendUpdateActiveCharacter(string id)
+        private void SendUpdateActiveCharacterFromMaster(string id)
         {
             if (onUpdateActiveCharacter != null)
                 onUpdateActiveCharacter.Invoke(id);
@@ -378,41 +379,43 @@ namespace PunArena
 
         public void SendDoSelectedAction(string entityId, string targetEntityId, int action, int seed)
         {
-            photonView.RPC(nameof(MasterSendDoSelectedAction), RpcTarget.MasterClient, entityId, targetEntityId, action, seed);
+            photonView.RPC(nameof(SendDoSelectedActionToMaster), RpcTarget.MasterClient, entityId, targetEntityId, action, seed);
         }
 
         [PunRPC]
-        private void MasterSendDoSelectedAction(string entityId, string targetEntityId, int action, int seed)
+        private void SendDoSelectedActionToMaster(string entityId, string targetEntityId, int action, int seed)
         {
             if (!PhotonNetwork.IsMasterClient) return;
             if (PunArenaExtensions.GetRoomState() != ERoomState.Battle) return;
             if (!waitForPlayerAction) return;
             waitForPlayerAction = false;
-            photonView.RPC(nameof(BroadSendDoSelectedAction), RpcTarget.All, entityId, targetEntityId, action, seed);
+            photonView.RPC(nameof(SendDoSelectedActionFromMaster), RpcTarget.Others, entityId, targetEntityId, action, seed);
+            if (onDoSelectedAction != null)
+                onDoSelectedAction.Invoke(entityId, targetEntityId, action, seed);
         }
 
         [PunRPC]
-        private void BroadSendDoSelectedAction(string entityId, string targetEntityId, int action, int seed)
+        private void SendDoSelectedActionFromMaster(string entityId, string targetEntityId, int action, int seed)
         {
             if (onDoSelectedAction != null)
                 onDoSelectedAction.Invoke(entityId, targetEntityId, action, seed);
         }
 
-        public void SendUpdateGameplayState(UpdateGameplayStateMsg msg)
+        public void SendUpdateGameplayState(int winnerActorNumber, int loserActorNumber)
         {
-            /*
             if (!PhotonNetwork.IsMasterClient) return;
             if (PunArenaExtensions.GetRoomState() != ERoomState.Battle) return;
             // TODO: Store gameplay state in-case player disconnect and reconnect they won't lose data.
-            photonView.RPC(nameof(BroadSendUpdateGameplayState), RpcTarget.All, msg);
-            */
+            photonView.RPC(nameof(SendUpdateGameplayStateFromMaster), RpcTarget.Others, winnerActorNumber, loserActorNumber);
+            if (onUpdateGameplayState != null)
+                onUpdateGameplayState.Invoke(winnerActorNumber, loserActorNumber);
         }
 
         [PunRPC]
-        private void BroadSendUpdateGameplayState(UpdateGameplayStateMsg msg)
+        private void SendUpdateGameplayStateFromMaster(int winnerActorNumber, int loserActorNumber)
         {
             if (onUpdateGameplayState != null)
-                onUpdateGameplayState.Invoke(msg);
+                onUpdateGameplayState.Invoke(winnerActorNumber, loserActorNumber);
         }
         #endregion
     }

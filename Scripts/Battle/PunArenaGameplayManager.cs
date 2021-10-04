@@ -1,6 +1,5 @@
 ﻿using Photon.Pun;
 using PunArena.Enums;
-using PunArena.Message;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -230,41 +229,12 @@ namespace PunArena.Battle
                 character.DoSkillAction(seed);
         }
 
-        public void OnUpdateGameplayState(UpdateGameplayStateMsg msg)
+        public void OnUpdateGameplayState(int winnerActorNumber, int loserActorNumber)
         {
-            foreach (var character in msg.characters)
-            {
-                allCharacters[character.entityId].Hp = character.currentHp;
-                allCharacters[character.entityId].CurrentTimeCount = character.currentTimeCount;
-                var skills = character.skills;
-                if (skills != null && skills.Count > 0)
-                {
-                    foreach (var skill in skills)
-                    {
-                        if (skill.index <= 0 || skill.index > allCharacters[character.entityId].Skills.Count)
-                            continue;
-                        var characterSkill = allCharacters[character.entityId].Skills[skill.index] as CharacterSkill;
-                        characterSkill.TurnsCount = skill.turnsCount;
-                        allCharacters[character.entityId].Skills[skill.index] = characterSkill;
-                    }
-                }
-                var buffs = character.buffs;
-                if (buffs != null && buffs.Count > 0)
-                {
-                    foreach (var buff in buffs)
-                    {
-                        if (!allCharacters[character.entityId].Buffs.ContainsKey(buff.id))
-                            continue;
-                        var characterBuff = allCharacters[character.entityId].Buffs[buff.id] as CharacterBuff;
-                        characterBuff.TurnsCount = buff.turnsCount;
-                        allCharacters[character.entityId].Buffs[buff.id] = characterBuff;
-                    }
-                }
-            }
-            if (msg.winnerActorNumber >= 0 || msg.loserActorNumber >= 0)
+            if (winnerActorNumber >= 0 || loserActorNumber >= 0)
             {
                 isEnding = true;
-                if (msg.winnerActorNumber.Equals(PhotonNetwork.LocalPlayer.ActorNumber))
+                if (winnerActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
                 {
                     // Show win dialog
                     uiWin.Show();
@@ -326,42 +296,7 @@ namespace PunArena.Battle
             }
 
             // Send characters updating to server
-            var msg = new UpdateGameplayStateMsg()
-            {
-                winnerActorNumber = winnerActorNumber,
-                loserActorNumber = loserActorNumber,
-                characters = new List<UpdateCharacterEntityMsg>()
-            };
-            foreach (var updatingCharacter in allCharacters)
-            {
-                var updatingSkills = new List<UpdateCharacterSkillMsg>();
-                for (int i = 0; i < updatingCharacter.Value.Skills.Count; ++i)
-                {
-                    updatingSkills.Add(new UpdateCharacterSkillMsg()
-                    {
-                        index = i,
-                        turnsCount = (updatingCharacter.Value.Skills[i] as CharacterSkill).TurnsCount,
-                    });
-                }
-                var updatingBuffs = new List<UpdateCharacterBuffMsg>();
-                foreach (var buff in updatingCharacter.Value.Buffs)
-                {
-                    updatingBuffs.Add(new UpdateCharacterBuffMsg()
-                    {
-                        id = buff.Key,
-                        turnsCount = (buff.Value as CharacterBuff).TurnsCount,
-                    });
-                }
-                msg.characters.Add(new UpdateCharacterEntityMsg()
-                {
-                    entityId = updatingCharacter.Key,
-                    currentHp = (int)updatingCharacter.Value.Hp,
-                    currentTimeCount = updatingCharacter.Value.CurrentTimeCount,
-                    skills = updatingSkills,
-                    buffs = updatingBuffs,
-                });
-            }
-            PunArenaManager.Instance.SendUpdateGameplayState(msg);
+            PunArenaManager.Instance.SendUpdateGameplayState(winnerActorNumber, loserActorNumber);
         }
 
         public override void NextWave()
