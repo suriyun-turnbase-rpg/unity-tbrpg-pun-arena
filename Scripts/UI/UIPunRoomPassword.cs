@@ -1,4 +1,4 @@
-﻿using RealtimeArena.Room;
+﻿using PunArena.Room;
 using UnityEngine.UI;
 
 namespace PunArena.UI
