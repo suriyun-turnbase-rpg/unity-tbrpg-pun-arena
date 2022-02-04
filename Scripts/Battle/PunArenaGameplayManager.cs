@@ -39,6 +39,7 @@ namespace PunArena.Battle
             PunArenaManager.Instance.onRoomStateChange.RemoveListener(OnStateChange);
             PunArenaManager.Instance.onUpdateActiveCharacter -= OnUpdateActiveCharacter;
             PunArenaManager.Instance.onDoSelectedAction -= OnDoSelectedAction;
+            PunArenaManager.Instance.onUpdateGameplayState -= OnUpdateGameplayState;
             GameInstance.Singleton.onLoadSceneStart.RemoveListener(OnLoadSceneStart);
         }
 
