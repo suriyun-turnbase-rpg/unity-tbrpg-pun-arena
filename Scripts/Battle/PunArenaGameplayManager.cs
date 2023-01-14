@@ -145,37 +145,39 @@ namespace PunArena.Battle
             ActiveCharacter.DecreaseBuffsTurn();
             ActiveCharacter.DecreaseSkillsTurn();
             ActiveCharacter.ResetStates();
-            if (ActiveCharacter.Hp > 0 &&
-                !ActiveCharacter.IsStun)
+            if (ActiveCharacter.Hp <= 0 || ActiveCharacter.IsStun)
             {
-                if (ActiveCharacter.IsPlayerCharacter)
+                ActiveCharacter.NotifyEndAction();
+                return;
+            }
+            if (ActiveCharacter.IsPlayerCharacter)
+            {
+                if (ActiveCharacter.IsProvoked)
                 {
-                    if (IsAutoPlay)
-                    {
-                        ActiveCharacter.RandomAction();
-                    }
-                    else
-                    {
-                        uiCharacterActionManager.Show();
-                        waitForActionCoroutine = StartCoroutine(WaitForActionSelection());
-                    }
+                    ActiveCharacter.DoProvokedAction();
+                    return;
+                }
+                if (IsAutoPlay)
+                {
+                    ActiveCharacter.RandomAction();
                 }
                 else
                 {
-                    if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
-                    {
-                        // Another player exit the game
-                        ActiveCharacter.RandomAction();
-                    }
-                    else
-                    {
-                        waitForActionCoroutine = StartCoroutine(WaitForActionSelection());
-                    }
+                    uiCharacterActionManager.Show();
+                    waitForActionCoroutine = StartCoroutine(WaitForActionSelection());
                 }
             }
             else
             {
-                ActiveCharacter.NotifyEndAction();
+                if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
+                {
+                    // Another player exit the game
+                    ActiveCharacter.RandomAction();
+                }
+                else
+                {
+                    waitForActionCoroutine = StartCoroutine(WaitForActionSelection());
+                }
             }
         }
 
