@@ -145,40 +145,46 @@ namespace PunArena.Battle
             ActiveCharacter.DecreaseBuffsTurn();
             ActiveCharacter.DecreaseSkillsTurn();
             ActiveCharacter.ResetStates();
-            if (ActiveCharacter.Hp <= 0 || ActiveCharacter.IsStun)
+            if (ActiveCharacter.Hp > 0 && !ActiveCharacter.IsStun)
             {
-                ActiveCharacter.NotifyEndAction();
-                return;
-            }
-            if (ActiveCharacter.IsPlayerCharacter)
-            {
-                if (ActiveCharacter.IsProvoked)
+                if (ActiveCharacter.Hp <= 0 || ActiveCharacter.IsStun)
                 {
-                    ActiveCharacter.DoProvokedAction();
+                    ActiveCharacter.NotifyEndAction();
                     return;
                 }
-                if (IsAutoPlay)
+                if (ActiveCharacter.IsPlayerCharacter)
                 {
-                    ActiveCharacter.RandomAction();
+                    if (ActiveCharacter.IsProvoked)
+                    {
+                        ActiveCharacter.DoProvokedAction();
+                        return;
+                    }
+                    if (IsAutoPlay)
+                    {
+                        ActiveCharacter.RandomAction();
+                    }
+                    else
+                    {
+                        uiCharacterActionManager.Show();
+                        waitForActionCoroutine = StartCoroutine(WaitForActionSelection());
+                    }
+                    return;
                 }
                 else
                 {
-                    uiCharacterActionManager.Show();
-                    waitForActionCoroutine = StartCoroutine(WaitForActionSelection());
+                    if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
+                    {
+                        // Another player exit the game
+                        ActiveCharacter.RandomAction();
+                    }
+                    else
+                    {
+                        waitForActionCoroutine = StartCoroutine(WaitForActionSelection());
+                    }
+                    return;
                 }
             }
-            else
-            {
-                if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
-                {
-                    // Another player exit the game
-                    ActiveCharacter.RandomAction();
-                }
-                else
-                {
-                    waitForActionCoroutine = StartCoroutine(WaitForActionSelection());
-                }
-            }
+            ActiveCharacter.NotifyEndAction();
         }
 
         private IEnumerator WaitForActionSelection()
