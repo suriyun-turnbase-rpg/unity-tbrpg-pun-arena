@@ -145,40 +145,41 @@ namespace PunArena.Battle
             ActiveCharacter.DecreaseBuffsTurn();
             ActiveCharacter.DecreaseSkillsTurn();
             ActiveCharacter.ResetStates();
-            if (ActiveCharacter.Hp <= 0 || ActiveCharacter.IsStun)
+            if (ActiveCharacter.Hp > 0 && !ActiveCharacter.IsStun)
             {
-                ActiveCharacter.NotifyEndAction();
-                return;
-            }
-            if (ActiveCharacter.IsPlayerCharacter)
-            {
-                if (ActiveCharacter.IsProvoked)
+                if (ActiveCharacter.IsPlayerCharacter)
                 {
-                    ActiveCharacter.DoProvokedAction();
+                    if (ActiveCharacter.IsProvoked)
+                    {
+                        ActiveCharacter.DoProvokedAction();
+                        return;
+                    }
+                    if (IsAutoPlay)
+                    {
+                        ActiveCharacter.RandomAction();
+                    }
+                    else
+                    {
+                        uiCharacterActionManager.Show();
+                        waitForActionCoroutine = StartCoroutine(WaitForActionSelection());
+                    }
                     return;
                 }
-                if (IsAutoPlay)
-                {
-                    ActiveCharacter.RandomAction();
-                }
                 else
                 {
-                    uiCharacterActionManager.Show();
-                    waitForActionCoroutine = StartCoroutine(WaitForActionSelection());
+                    if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
+                    {
+                        // Another player exit the game
+                        ActiveCharacter.RandomAction();
+                    }
+                    else
+                    {
+                        waitForActionCoroutine = StartCoroutine(WaitForActionSelection());
+                    }
+                    return;
                 }
             }
-            else
-            {
-                if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
-                {
-                    // Another player exit the game
-                    ActiveCharacter.RandomAction();
-                }
-                else
-                {
-                    waitForActionCoroutine = StartCoroutine(WaitForActionSelection());
-                }
-            }
+            ActiveCharacter.NotifyEndAction();
         }
 
         private IEnumerator WaitForActionSelection()
@@ -203,7 +204,7 @@ namespace PunArena.Battle
             character.Action = action;
             character.ActionTarget = target;
             if (character.Action == CharacterEntity.ACTION_ATTACK)
-                character.DoAttackAction(seed);
+                character.DoAttackAction(seed, false);
             else
                 character.DoSkillAction(seed);
         }
