@@ -147,11 +147,6 @@ namespace PunArena.Battle
             ActiveCharacter.ResetStates();
             if (ActiveCharacter.Hp > 0 && !ActiveCharacter.IsStun)
             {
-                if (ActiveCharacter.Hp <= 0 || ActiveCharacter.IsStun)
-                {
-                    ActiveCharacter.NotifyEndAction();
-                    return;
-                }
                 if (ActiveCharacter.IsPlayerCharacter)
                 {
                     if (ActiveCharacter.IsProvoked)
