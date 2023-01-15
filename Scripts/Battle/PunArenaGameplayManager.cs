@@ -203,7 +203,7 @@ namespace PunArena.Battle
             character.Action = action;
             character.ActionTarget = target;
             if (character.Action == CharacterEntity.ACTION_ATTACK)
-                character.DoAttackAction(seed);
+                character.DoAttackAction(seed, false);
             else
                 character.DoSkillAction(seed);
         }
